@@ -14,6 +14,16 @@ BOT_NAME = 'QBScraper'
 SPIDER_MODULES = ['QBScraper.spiders']
 NEWSPIDER_MODULE = 'QBScraper.spiders'
 
+# *Export as CSV
+FEED_FORMAT = "csv"
+FEED_URI = "Restaurants.csv"
+
+# *Downwload Images
+ITEM_PIPELINES = {
+    'scrapy.pipelines.images.ImagesPipeline' : 1
+ }
+
+IMAGES_STORE = 'images/'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'QBScraper (+http://www.yourdomain.com)'

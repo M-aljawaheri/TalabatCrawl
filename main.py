@@ -3,7 +3,7 @@
 # @date  : 6/4/2020
 ###############################
 from typing import *  # using type annotations for runtime checks
-
+import scrapy
 # Restaurant object holds restaurant information + a list of foodItem objects
 # Fooditem objects wrap a given food item info in a single structure
 
