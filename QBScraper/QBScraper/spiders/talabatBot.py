@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 import image
 import scrapy
+import json
 import re
+import requests
+from bs4 import BeautifulSoup
 from scrapy.shell import inspect_response  # for debugging
+from scrapy.http import Request
+#from selenium import webdriver
 
-'''from bs4 import BeautifulSoup
-import requests'''
-# Beautiful soup is used to extract all the restaurant URLs
-## that the spider will crawl through eventually
 class TalabatbotSpider(scrapy.Spider):
     name = 'talabatBot'
     mainDomain: str = 'https://www.talabat.com'
@@ -30,37 +31,47 @@ class TalabatbotSpider(scrapy.Spider):
         'FEED_URI': 'talabat.csv'
     }
 
+    JSON_Request_URL: str = "https://www.talabat.com/apps/dist/talabat/components/info/infoController.js?v=2020-06-01T09:19:25.0278186"
     # Parse is called whenever the spider successfully crawls a URL
     # Response object is automatically filled with page info and passed to parse
 
-    # Step 1: Main parse callback, crawling starts here
-    ## Gather: None
-    ## Fetch : All restaurant links
+    # Step 1: Main parse callback, crawling starts here "talabat/qatar/allRestaurants"
+    # Gather: None
+    # Fetch : All restaurant links
     def parse(self, response):
-        x = 5
-        #inspect_response(response, self) TODO: send requests for more links once you're done
-        #filter(lambda x: x != '/qatar/restaurants',)
+        # TODO: send requests for more links once you're done
         for restaurant in response.xpath("//a[contains(@href, '/qatar')]/@href").extract()[16:-39]:
             yield scrapy.Request(response.urljoin(self.mainDomain + restaurant), callback=self.parse_restaurant_page)
 
 
 
-    # Step 2: Parsing individual restaurant pages
-    ## Gather: basic info (e.g Restaurant Name)
-    ## Fetch : Link to Menu page
+    # Step 2: Parsing individual restaurant pages "talabat/qatar/specificRestaurant"
+    # Gather: basic info (e.g Restaurant Name)
+    # Fetch : Link to Menu page
     def parse_restaurant_page(self, response):
         #inspect_response(response, self)
+        # 1) Get the json file containing all restaurant information
+        data = self.get_ld_json(response.url)
+        return scrapy.Request(url=self.JSON_Request_URL, dont_filter=True,
+                       callback=self.get_JSON_File)
 
-        # Get the json file containing all restaurant information
 
         # bypass location by adding default mainlocation to URL
-        # and continue to menu items page
-        # response.urljoin
-        x = 5
-        pass
+        # and continue to menu items page with response.urljoin
+
+    def get_JSON_File(self, response):
+        data = self.get_ld_json(response.url)
+        x=5
+
+
+    def get_ld_json(self, url: str) -> dict:
+        parser = "html.parser"
+        req = requests.get(url)
+        soup = BeautifulSoup(req.text, parser)
+        return json.loads("".join(soup.find("script", {"type":"application/ld+json"}).contents))
 
 
     # Step 3: Main parse, parse information from the restaurant
-    ## Parse Menu items / prices / working hours / etc
+    # Parse Menu items / prices / working hours / etc
     def parse_menu_page(self, response):
         pass
