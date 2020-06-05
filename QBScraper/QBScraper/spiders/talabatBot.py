@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import image
 import scrapy
+import re
 from scrapy.shell import inspect_response  # for debugging
 
 '''from bs4 import BeautifulSoup
@@ -24,6 +25,7 @@ class TalabatbotSpider(scrapy.Spider):
 
     # allowed_domains = ['https://www.talabat.com/qatar/restaurants']
     start_urls = ["https://www.talabat.com/qatar/restaurants"]
+    default_location = "al-mansoura"
     custom_settings = {
         'FEED_URI': 'talabat.csv'
     }
@@ -35,18 +37,26 @@ class TalabatbotSpider(scrapy.Spider):
     ## Gather: None
     ## Fetch : All restaurant links
     def parse(self, response):
-        print(response.xpath("//a[contains(@href, '/restaurants')]/@href").extract())
-        #inspect_response(response, self)
-        # Here we extract the information we want from the response
-        for restaurant in filter(lambda x: x != '/qatar/restaurants',
-                                 response.xpath("//a[contains(@href, '/restaurants')]/@href").extract()):
+        x = 5
+        #inspect_response(response, self) TODO: send requests for more links once you're done
+        #filter(lambda x: x != '/qatar/restaurants',)
+        for restaurant in response.xpath("//a[contains(@href, '/qatar')]/@href").extract()[16:-39]:
             yield scrapy.Request(response.urljoin(self.mainDomain + restaurant), callback=self.parse_restaurant_page)
+
 
 
     # Step 2: Parsing individual restaurant pages
     ## Gather: basic info (e.g Restaurant Name)
     ## Fetch : Link to Menu page
     def parse_restaurant_page(self, response):
+        #inspect_response(response, self)
+
+        # Get the json file containing all restaurant information
+
+        # bypass location by adding default mainlocation to URL
+        # and continue to menu items page
+        # response.urljoin
+        x = 5
         pass
 
 
