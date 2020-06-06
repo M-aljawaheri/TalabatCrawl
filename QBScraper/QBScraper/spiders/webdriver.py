@@ -106,5 +106,7 @@ def runWebDriver(url):
     items_list = Talabat.parse()
     return items_list
 
-if (__name__ == "main"):        # For testing
-    runWebDriver("https://www.talabat.com/qatar/fajitas-mexican-grill1")
+
+if (__name__ == "__main__"):
+    testurl = "https://www.talabat.com/qatar/restaurant/44540/al-nasiriya?aid=1732"
+    runWebDriver(testurl)

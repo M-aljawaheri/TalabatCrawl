@@ -3,7 +3,9 @@ import image
 import scrapy
 from scrapy.shell import inspect_response  # for debugging
 from scrapy.http import Request
-from QBScraper.spiders.webdriver import *
+import os, sys; sys.path.append(os.path.dirname(os.path.realpath('webdriver.py')))
+from . import webdriver
+
 
 class TalabatbotSpider(scrapy.Spider):
     name = 'talabatBot'
@@ -24,7 +26,7 @@ class TalabatbotSpider(scrapy.Spider):
     def parse(self, response):
         # TODO: send requests for more links once you're done
         for restaurant in response.xpath("//a[contains(@href, '/qatar')]/@href").extract()[16:-39]:
-            yield scrapy.Request(response.urljoin(self.mainDomain + restaurant), callback=self.parse_restaurant_page)
+            return scrapy.Request(response.urljoin(self.mainDomain + restaurant), callback=self.parse_restaurant_page)
 
 
 
@@ -34,7 +36,7 @@ class TalabatbotSpider(scrapy.Spider):
     def parse_restaurant_page(self, response):
         #inspect_response(response, self)
         # 1) Get the json file containing all restaurant information
-        data = self.get_JSON_File(response)
+        self.data = self.get_JSON_File(response)
 
 
         # Test pipeline
@@ -50,14 +52,14 @@ class TalabatbotSpider(scrapy.Spider):
 
     # This method gets any json file in a page
     def get_JSON_File(self, response):
-        Talabat = TalabatWDSpider(response.url)
+        Talabat = webdriver.TalabatWDSpider(response.url)
         items_list = Talabat.parse()
-        return items_list
+        return items_list[0]
 
     # Step 3: Main parse, parse information from the restaurant
     # Parse Menu items / prices / working hours / etc
     def parse_menu_page(self, response):
-        x = 5
+        restaurant_advanced_info = get_JSON_File(response)[0]
         # Get the first JSON_File
         pass
 
