@@ -3,9 +3,7 @@ import image
 import scrapy
 from scrapy.shell import inspect_response  # for debugging
 from scrapy.http import Request
-import sys
-sys.path.append('/../../main.py/config')
-import main
+from QBScraper.spiders.webdriver import *
 
 class TalabatbotSpider(scrapy.Spider):
     name = 'talabatBot'
