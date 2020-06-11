@@ -24,6 +24,7 @@ ITEM_PIPELINES = {
  }
 
 IMAGES_STORE = 'images/'
+#HTTPERROR_ALLOWED_CODES  =[404, 302]
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'QBScraper (+http://www.yourdomain.com)'
