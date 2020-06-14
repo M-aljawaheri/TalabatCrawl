@@ -9,6 +9,7 @@ from time import sleep
 from random import randint
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
 import requests
 import json
@@ -133,7 +134,6 @@ class MenuPageSpider(TalabatWDSpider):
         # If getting all items fails
         return False
 
-from selenium.webdriver.common.keys import Keys
 
 class scrollerDriver(TalabatWDSpider):
     def scrollDown(self):
@@ -178,8 +178,6 @@ class scrollerDriver(TalabatWDSpider):
                 if processed_name not in forbiddenLabels:
                     allRestaurants.append(processed_name)
 
-
-
         return allRestaurants
 
     def parse(self):
@@ -190,6 +188,7 @@ class scrollerDriver(TalabatWDSpider):
         self.close_driver()
 
         return rest_list
+
 
 def runWebDriverJSON(url):
     """
@@ -220,20 +219,3 @@ def runScrollDriver(url):
 if (__name__ == "__main__"):
     testurl = "https://www.talabat.com/qatar/restaurant/44540/al-nasiriya?aid=1732"
     runWebDriver(testurl)
-
-
-"""
----prototype1---
-old_position = 0
-new_position = None
-
-while new_position != old_position:
-    # Get old scroll position
-    old_position = self.driver.execute_script(("return (window.pageYOffset !== undefined) ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body);"))
-    # Sleep and Scroll
-    sleep(1)
-    self.driver.execute_script(("var scrollingElement = (document.scrollingElement || document.body);scrollingElement.scrollTop = scrollingElement.scrollHeight;"))
-    # Get new position
-    new_position = self.driver.execute_script(("return (window.pageYOffset !== undefined) ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body);"))
-
-"""
