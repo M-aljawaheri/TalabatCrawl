@@ -133,7 +133,63 @@ class MenuPageSpider(TalabatWDSpider):
         # If getting all items fails
         return False
 
+from selenium.webdriver.common.keys import Keys
 
+class scrollerDriver(TalabatWDSpider):
+    def scrollDown(self):
+        pause = 0.5
+        offset = 1000
+        lastHeight = self.driver.execute_script(f"return document.body.scrollHeight-{offset}")
+        while True:
+            offset = offset - 200 if offset > 400 else 400
+            self.driver.execute_script(f"window.scrollTo(0, document.body.scrollHeight-{offset});")
+            sleep(pause)
+            newHeight = self.driver.execute_script("return document.body.scrollHeight")
+            if newHeight == lastHeight:
+                break
+            lastHeight = newHeight
+
+    def getSoup(self):
+        # Category labels are forbidden; we want restaurants
+        forbiddenLabels = [
+            "Thai", "Healthy-food", "Healthy-Food", "Indian", "Cafe",
+            "Grocery", "Desserts", "Turkish", "Flowers", "Qatari",
+            "Mexican", "Pharmacy", "Italian", "Turkish", "Egyptian",
+            "Arabic", "Monoprix", "International", "Electronics", "Pasta",
+            "Burgers", "Lebanese", "American", "Breakfast", "pizzas",
+            "Asian", "Cosmetics", "Specialty-Store", "Beverages", "Iranian",
+            "Japanese", "Feedback", "Careers", "Terms", "FAQ", "Health-and-Beauty-Pharmacy",
+            "Privacy", "Contact-Us", "Sitemap", "Dermacol-Cosmetics-&-Skin-Care",
+            "Pick-And-Save-Supermarket", "International-Foodstuff-Group-I-F-G"
+        ]
+        headers = requests.utils.default_headers()
+        headers.update({ 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0'})
+        # Fetch HTML file from talabat restaurant menu
+        req = requests.get(self.driver.current_url)
+        soup = BeautifulSoup(req.content, 'lxml')
+        #allRestaurants = [x.text[:x.text.find("\n")].replace(" ", "-") for x in self.driver.find_elements_by_xpath("//a[contains(@href, '/qatar')]") if x.text != '' and ',' not in x.text and x.text[:x.text.find("\n")].replace(" ", "-") not in forbiddenLabels]
+        # Unrolled loop comprehension (saves up on redundant operations)
+        allRestaurants = []
+        for restaurant in self.driver.find_elements_by_xpath("//a[contains(@href, '/qatar')]"):
+            if restaurant.text != '' and ',' not in restaurant.text:
+                newline_index = restaurant.text.find("\n")
+                processed_name = restaurant.text[:newline_index].replace(" ", "-") if newline_index != -1 else restaurant.text.replace(" ", "-")
+
+                if processed_name not in forbiddenLabels:
+                    allRestaurants.append(processed_name)
+
+
+
+        return allRestaurants
+
+    def parse(self):
+        self.start_driver()
+        self.get_page(self.url_to_crawl)
+        self.scrollDown()
+        rest_list = self.getSoup()
+        self.close_driver()
+
+        return rest_list
 
 def runWebDriverJSON(url):
     """
@@ -155,6 +211,29 @@ def runWebDriverMenuPage(url):
     items_list = Talabat.parse()
     return items_list
 
+
+def runScrollDriver(url):
+    Talabat = scrollerDriver(url)
+    return Talabat.parse()
+
+
 if (__name__ == "__main__"):
     testurl = "https://www.talabat.com/qatar/restaurant/44540/al-nasiriya?aid=1732"
     runWebDriver(testurl)
+
+
+"""
+---prototype1---
+old_position = 0
+new_position = None
+
+while new_position != old_position:
+    # Get old scroll position
+    old_position = self.driver.execute_script(("return (window.pageYOffset !== undefined) ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body);"))
+    # Sleep and Scroll
+    sleep(1)
+    self.driver.execute_script(("var scrollingElement = (document.scrollingElement || document.body);scrollingElement.scrollTop = scrollingElement.scrollHeight;"))
+    # Get new position
+    new_position = self.driver.execute_script(("return (window.pageYOffset !== undefined) ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body);"))
+
+"""
