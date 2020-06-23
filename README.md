@@ -12,3 +12,5 @@ A simple pip install should be enough for each one of them respectively.
 # Usage
 Feel free to use the JSON file i provided or run the crawler on your own if you want to modify it for your purposes.
 Credit for using the Data or the crawler is appreciated, but not required.
+
+To actually run the crawler you'll have to run it from runner.py, I made it this way so you can easily debug and step through the code instead of running it from the command line.
